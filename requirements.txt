@@ -1,0 +1,8 @@
+datasets
+bm25s
+PyStemmer
+sentence-transformers
+faiss-cpu
+numpy
+tqdm
+pytest
