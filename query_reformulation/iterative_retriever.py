@@ -16,31 +16,32 @@ def iterative_retrieve(missing_aspects, task, method="bm25",
         queries = list(dict.fromkeys(queries))[:max_queries]
 
         for query in queries:
-            documents = retrieve(
+            docs = retrieve(
                 query=query,
                 task=task,
                 method=method,
                 top_k=top_k
             )
+            all_documents.extend(docs)
 
-            all_documents.extend(documents)
-
-    results = []
+    final_documents = []
 
     for aspect in missing_aspects:
-        filtered = filter_documents(
+        results = filter_documents(
             all_documents,
             top_k=top_k * 2,
             query=aspect,
-            min_similarity=0.05
+            min_similarity=0.15
         )
-        results.extend(filtered)
+        final_documents.extend(results)
 
-    return filter_documents(results, top_k=top_k * 2)
+    return filter_documents(
+        final_documents,
+        top_k=top_k * 2
+    )
 
 
 if __name__ == "__main__":
-
     aspects = ["Effects of climate change on agriculture"]
 
     results = iterative_retrieve(
