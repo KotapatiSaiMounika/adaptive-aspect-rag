@@ -1,13 +1,15 @@
 
-def filter_documents(documents, top_k=10):
+def filter_documents(documents, top_k=10, min_score=0.0):
     unique_docs = {}
 
     for doc in documents:
         doc_id = doc["doc_id"]
+        score = float(doc["score"])
 
-        if doc_id not in unique_docs:
-            unique_docs[doc_id] = doc
-        elif doc["score"] > unique_docs[doc_id]["score"]:
+        if score < min_score:
+            continue
+
+        if doc_id not in unique_docs or score > unique_docs[doc_id]["score"]:
             unique_docs[doc_id] = doc
 
     filtered = sorted(
@@ -17,18 +19,3 @@ def filter_documents(documents, top_k=10):
     )
 
     return filtered[:top_k]
-
-
-if __name__ == "__main__":
-
-    sample_docs = [
-        {"doc_id": "1", "text": "Climate change affects crops", "score": 0.8},
-        {"doc_id": "2", "text": "Global warming affects farming", "score": 0.9},
-        {"doc_id": "1", "text": "Climate change affects crops", "score": 0.95},
-    ]
-
-    results = filter_documents(sample_docs)
-
-    print("Filtered documents:")
-    for doc in results:
-        print(doc["doc_id"], doc["score"])
