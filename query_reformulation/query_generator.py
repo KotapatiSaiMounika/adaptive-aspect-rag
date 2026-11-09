@@ -1,43 +1,33 @@
 
+import re
+
+
 def generate_queries(missing_aspects):
-    """
-    Generate alternative search queries from missing aspects.
-
-    Args:
-        missing_aspects: List of aspects that need more information.
-
-    Returns:
-        List of improved search queries.
-    """
-
     queries = []
 
     for aspect in missing_aspects:
+        aspect = aspect.strip()
 
-        # Original aspect itself is a search query
+        if not aspect:
+            continue
+
         queries.append(aspect)
 
-        # Generate alternative search queries
-        queries.append(f"What are the {aspect}?")
-        queries.append(f"Impact and effects of {aspect}")
-        queries.append(f"Research and evidence about {aspect}")
+        clean = re.sub(r"^(impact of|effects of|role of)\s+", "", aspect, flags=re.I)
 
-    # Remove duplicate queries
-    queries = list(dict.fromkeys(queries))
+        queries.extend([
+            f"{clean} causes and consequences",
+            f"{clean} research findings",
+            f"{clean} real-world examples",
+            f"Factors influencing {clean}",
+            f"Recent studies about {clean}"
+        ])
 
-    return queries
+    return list(dict.fromkeys(queries))
 
 
 if __name__ == "__main__":
+    aspects = ["Effects of climate change on agriculture"]
 
-    missing_aspects = [
-        "Economic effects of climate change",
-        "Impact of climate change on agriculture"
-    ]
-
-    queries = generate_queries(missing_aspects)
-
-    print("Generated Search Queries:\n")
-
-    for i, query in enumerate(queries, 1):
+    for i, query in enumerate(generate_queries(aspects), 1):
         print(f"{i}. {query}")
