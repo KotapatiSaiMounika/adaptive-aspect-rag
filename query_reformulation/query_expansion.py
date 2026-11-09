@@ -1,55 +1,47 @@
 
-def expand_query(aspect):
+import re
+
+
+def expand_query(aspect, max_expansions=6):
     """
-    Expand a missing aspect into related search queries.
+    Generate alternative search queries for a reasoning aspect.
+
+    Supports both string and dictionary aspect formats.
     """
 
-    expansions = {
-        "agriculture": [
-            "climate change and crop production",
-            "global warming and farming",
-            "agricultural productivity under changing climate",
-            "drought and food security",
-            "climate variability and crop yields"
-        ],
+    # Handle dictionary input
+    if isinstance(aspect, dict):
+        aspect = (
+            aspect.get("description")
+            or aspect.get("aspect")
+            or aspect.get("text")
+            or aspect.get("name")
+            or ""
+        )
 
-        "economy": [
-            "economic consequences",
-            "financial losses",
-            "economic growth and development",
-            "climate change and employment",
-            "cost of environmental damage"
-        ],
+    # Normalize the aspect text
+    aspect = re.sub(r"\s+", " ", str(aspect)).strip()
 
-        "health": [
-            "public health consequences",
-            "human health risks",
-            "climate change and disease",
-            "heat-related illnesses",
-            "environmental health impacts"
-        ]
-    }
+    if not aspect:
+        return []
 
-    aspect_lower = aspect.lower()
+    if max_expansions <= 0:
+        return []
 
-    expanded_queries = [aspect]
+    # Generate alternative search formulations
+    expanded_queries = [
+        aspect,
+        f"{aspect} supporting evidence",
+        f"{aspect} causes and contributing factors",
+        f"{aspect} underlying mechanisms",
+        f"{aspect} effects and implications",
+        f"{aspect} research findings and examples",
+        f"{aspect} relevant studies and observations",
+        f"{aspect} explanations and real-world examples",
+    ]
 
-    for category, terms in expansions.items():
-        if category in aspect_lower:
-            expanded_queries.extend(terms)
+    # Remove duplicates while preserving order
+    expanded_queries = list(dict.fromkeys(expanded_queries))
 
-    # Remove duplicates
-    return list(dict.fromkeys(expanded_queries))
-
-
-if __name__ == "__main__":
-
-    aspect = "Effects of climate change on agriculture"
-
-    queries = expand_query(aspect)
-
-    print("Original Aspect:", aspect)
-    print("\nExpanded Queries:")
-
-    for i, query in enumerate(queries, 1):
-        print(f"{i}. {query}")
+    # Limit the number of generated queries
+    return expanded_queries[:max_expansions]

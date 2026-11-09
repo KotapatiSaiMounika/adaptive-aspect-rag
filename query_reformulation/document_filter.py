@@ -1,40 +1,85 @@
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+def filter_documents(
+    documents,
+    top_k=10,
+    min_score=None
+):
+    """
+    Validate documents, remove duplicates, merge retrieval metadata,
+    and return the highest-ranked documents.
+    """
 
+    if top_k <= 0:
+        return []
 
-def filter_documents(documents, top_k=10, min_score=0.0,
-                     query=None, min_similarity=0.05):
+    unique_documents = {}
 
-    unique_docs = {}
+    for doc in documents or []:
 
-    for doc in documents:
-        doc_id = doc["doc_id"]
-        score = float(doc["score"])
-
-        if score < min_score:
+        if not isinstance(doc, dict):
             continue
 
-        if doc_id not in unique_docs or score > unique_docs[doc_id]["score"]:
-            unique_docs[doc_id] = doc
+        doc_id = doc.get("doc_id")
+        text = doc.get("text", "")
 
-    filtered = list(unique_docs.values())
+        if not doc_id or not isinstance(text, str):
+            continue
 
-    if query and filtered:
-        texts = [query] + [doc["text"] for doc in filtered]
+        if not text.strip():
+            continue
 
-        vectorizer = TfidfVectorizer(stop_words="english")
-        matrix = vectorizer.fit_transform(texts)
+        try:
+            score = float(doc.get("score", 0.0))
+        except (ValueError, TypeError):
+            continue
 
-        similarities = cosine_similarity(
-            matrix[0:1], matrix[1:]
-        )[0]
+        if min_score is not None and score < min_score:
+            continue
 
-        filtered = [
-            doc for doc, similarity in zip(filtered, similarities)
-            if similarity >= min_similarity
-        ]
+        doc = dict(doc)
+        doc["doc_id"] = str(doc_id)
+        doc["text"] = text.strip()
+        doc["score"] = score
 
-    filtered.sort(key=lambda x: x["score"], reverse=True)
+        key = doc["doc_id"]
 
-    return filtered[:top_k]
+        if key not in unique_documents:
+            unique_documents[key] = doc
+
+        else:
+            existing = unique_documents[key]
+
+            # Preserve aspect associations.
+            aspects = list(
+                existing.get("retrieved_for_aspects", [])
+            )
+
+            for aspect_id in doc.get("retrieved_for_aspects", []):
+                if aspect_id not in aspects:
+                    aspects.append(aspect_id)
+
+            # Preserve retrieval query history.
+            queries = list(
+                existing.get("retrieval_queries", [])
+            )
+
+            for query in doc.get("retrieval_queries", []):
+                if query not in queries:
+                    queries.append(query)
+
+            # Keep the highest-scoring document version.
+            if score > existing["score"]:
+                unique_documents[key] = doc
+
+            # Restore merged metadata.
+            unique_documents[key]["retrieved_for_aspects"] = aspects
+            unique_documents[key]["retrieval_queries"] = queries
+
+    results = list(unique_documents.values())
+
+    results.sort(
+        key=lambda item: item["score"],
+        reverse=True
+    )
+
+    return results[:top_k]
