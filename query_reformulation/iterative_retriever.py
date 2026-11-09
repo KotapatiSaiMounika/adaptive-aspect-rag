@@ -22,12 +22,25 @@ def iterative_retrieve(missing_aspects, task, method="bm25",
                 method=method,
                 top_k=top_k
             )
+
             all_documents.extend(documents)
 
-    return filter_documents(all_documents, top_k=top_k * 2)
+    results = []
+
+    for aspect in missing_aspects:
+        filtered = filter_documents(
+            all_documents,
+            top_k=top_k * 2,
+            query=aspect,
+            min_similarity=0.05
+        )
+        results.extend(filtered)
+
+    return filter_documents(results, top_k=top_k * 2)
 
 
 if __name__ == "__main__":
+
     aspects = ["Effects of climate change on agriculture"]
 
     results = iterative_retrieve(
@@ -37,7 +50,8 @@ if __name__ == "__main__":
         top_k=5
     )
 
-    print("Unique documents retrieved:", len(results))
+    print("Relevant documents:", len(results))
 
     for doc in results:
-        print(doc["doc_id"], doc["score"])
+        print("\n", doc["doc_id"], doc["score"])
+        print(doc["text"][:200])
