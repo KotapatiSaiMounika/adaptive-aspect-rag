@@ -5,3 +5,7 @@ indexes/*
 !indexes/.gitkeep
 *.npy
 .env
+venv/
+.venv/
+__pycache__/
+*.pyc
