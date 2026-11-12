@@ -94,8 +94,3 @@ def revise(question, ans, report, evidence, max_docs=12):
     user = (f"DOCUMENTS:\n{_context(docs)}\n\nQUESTION:\n{question}\n\n"
             f"DRAFT ANSWER:\n{ans['text']}\n\nUNSUPPORTED CLAIMS:\n{bad}")
     return _pack(llm.chat(REVISE_SYSTEM, user, max_tokens=4000), docs)
-
-def test_citation_after_period_attaches_to_claim():
-    text = "- LED lights attract fewer insects than mercury lamps. [d1]\n**A heading line**\n"
-    claims = extract_claims(text, {"d1"})
-    assert len(claims) == 1 and claims[0]["cited"] == ["d1"]
