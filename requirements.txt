@@ -5,4 +5,5 @@ sentence-transformers
 faiss-cpu
 numpy
 tqdm
-pytest
+pytestopenai>=1.0
+python-dotenv
