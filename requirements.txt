@@ -6,3 +6,5 @@ faiss-cpu
 numpy
 tqdm
 pytest
+openai>=1.0
+python-dotenv

@@ -69,3 +69,17 @@ Output: `experiments/baselines/<method>_results.jsonl` (one JSON line per questi
 ```bash
 pytest -v
 ```
+## Generation & Verification (Member 5)
+Cited answer generation, claim-level support checking (Self-RAG IsSup/IsUse style) and a quality
+report that tells the controller whether to search again. Details and results: `docs/member5_generation.md`.
+
+Setup: copy `.env.example` to `.env` and fill in `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`
+(optionally `JUDGE_MODEL`).
+
+    python -m generation.run_baseline --task biology --method dense --top_k 6 --limit 20
+    python -m generation.run_full --task biology --limit 10
+    python -m evaluation.evaluate_answers experiments/generation/*.jsonl
+    python -m pytest tests/test_generation.py
+
+Controller entry point: `generation.pipeline.generate_and_verify(question, evidence, aspects)` returns
+`{"answer", "report"}`; `report["needs_retrieval"]` and `report["uncovered_aspects"]` drive the re-search decision.
