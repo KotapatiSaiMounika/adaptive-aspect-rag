@@ -178,8 +178,10 @@ pytest -q
 | Component | Document |
 |---|---|
 | Dataset, preprocessing and retrieval (Member 1) | [docs/member1_retrieval.md](docs/member1_retrieval.md) |
+| Aspect extraction and document-aspect relevance (Member 2) | [docs/member2_aspects.md](docs/member2_aspects.md) |
+| Query reformulation and iterative retrieval (Member 3) | [docs/member3_query_reformulation.md](docs/member3_query_reformulation.md) |
+| Aspect scoring and the adaptive controller (Member 4) | [docs/member4_controller.md](docs/member4_controller.md) |
 | Answer generation, verification and evaluation (Member 5) | [docs/member5_generation.md](docs/member5_generation.md) |
-| Aspect extraction, scoring, controller, query reformulation (Members 2 to 4) | Module docstrings in `controller/` and `query_reformulation/`, plus their tests |
 
 ## Limitations
 
