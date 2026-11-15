@@ -1,11 +1,9 @@
 .venv/
+venv/
 __pycache__/
+*.pyc
 .pytest_cache/
+.env
 indexes/*
 !indexes/.gitkeep
 *.npy
-.env
-venv/
-.venv/
-__pycache__/
-*.pyc

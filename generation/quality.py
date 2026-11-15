@@ -1,6 +1,5 @@
 # generation/quality.py
 from generation.claim_checker import check_support, judge_answer, SCORE
-from generation.answer_generator import norm_aspects
 
 def verify(question, ans, evidence, aspects=None, support_thr=0.8, utility_thr=4):
     claims = ans["claims"]

@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict
 
-path = "experiments/controller/controller_results_full_system_backup.jsonl"
+path = "experiments/controller/controller_results.jsonl"
 
 with open(path, encoding="utf-8") as f:
     rows = [json.loads(line) for line in f if line.strip()]

@@ -2,11 +2,11 @@ import argparse, json, os, time
 from data.dataset_loader import load_questions
 from retrieval.retrieval_interface import retrieve
 from generation.pipeline import generate_and_verify
+from generation import llm
 
 
 def is_daily_limit(e):
-    m = str(e)
-    return "per day" in m or "TPD" in m
+    return llm.is_quota_error(e)
 
 
 def main():
@@ -18,6 +18,7 @@ def main():
     ap.add_argument("--pause", type=float, default=8.0, help="seconds between questions")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
+    llm.require_config()
     out = a.out or f"experiments/generation/baseline_{a.method}_{a.task}.jsonl"
     os.makedirs(os.path.dirname(out), exist_ok=True)
     done = set()
@@ -36,7 +37,7 @@ def main():
                     res = generate_and_verify(q["query"], ev, aspects=None, max_revisions=0)
                     break
                 except Exception as e:
-                    print("FAILED", q["qid"], type(e).__name__, str(e)[:160])
+                    print("FAILED", q["qid"], type(e).__name__, llm.error_text(e)[:300])
                     if is_daily_limit(e):
                         print("Daily limit reached: stopping. Re-run tomorrow or switch model.")
                         return

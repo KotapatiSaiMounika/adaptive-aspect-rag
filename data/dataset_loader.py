@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 HF_REPO = "yale-nlp/Bright-Pro"
+_WARNED_ROOT = False
 TASKS = ["biology", "earth_science", "economics", "psychology",
          "robotics", "stackoverflow", "sustainable_living"]
 
@@ -24,12 +25,19 @@ def _read(config: str, task: str) -> list:
     """config is one of: examples, documents, aspects."""
     root = os.environ.get("BRIGHT_PRO_DATA_ROOT")
     if root:  # offline mirror: <root>/<config>/<task>.json
-        with open(Path(root) / config / f"{task}.json", encoding="utf-8") as f:
-            data = json.load(f)
-        if isinstance(data, dict):
-            data = [{"id": k, **v} if isinstance(v, dict) else {"id": k, "value": v}
-                    for k, v in data.items()]
-        return data
+        path = Path(root) / config / f"{task}.json"
+        if path.is_file():
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                data = [{"id": k, **v} if isinstance(v, dict) else {"id": k, "value": v}
+                        for k, v in data.items()]
+            return data
+        global _WARNED_ROOT
+        if not _WARNED_ROOT:
+            print(f"[warn] BRIGHT_PRO_DATA_ROOT={root} has no {config}/{task}.json; "
+                  "using the Hugging Face dataset instead.", flush=True)
+            _WARNED_ROOT = True
     from datasets import load_dataset
     return [dict(r) for r in load_dataset(HF_REPO, config)[task]]
 

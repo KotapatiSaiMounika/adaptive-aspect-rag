@@ -7,12 +7,12 @@ from data.dataset_loader import load_questions
 from data.preprocessing import get_clean_corpus
 from retrieval.retrieval_interface import retrieve
 from generation.pipeline import generate_and_verify
+from generation import llm
 from generation.answer_generator import norm_aspects
 
 
 def is_daily_limit(e):
-    m = str(e)
-    return "per day" in m or "TPD" in m
+    return llm.is_quota_error(e)
 
 
 def run_question(q, a, scorer, cfg):
@@ -94,6 +94,7 @@ def main():
     ap.add_argument("--pause", type=float, default=8.0)
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
+    llm.require_config()
     out = a.out or f"experiments/generation/full_{a.task}.jsonl"
     os.makedirs(os.path.dirname(out), exist_ok=True)
 
@@ -118,7 +119,7 @@ def main():
                     rec = run_question(q, a, scorer, cfg)
                     break
                 except Exception as e:
-                    print("FAILED", q["qid"], type(e).__name__, str(e)[:160])
+                    print("FAILED", q["qid"], type(e).__name__, llm.error_text(e)[:300])
                     if is_daily_limit(e):
                         print("Daily limit reached: stopping. Re-run later or switch model.")
                         return
